@@ -1,6 +1,10 @@
 
 Structure of a Shader:
 
+/***********************************************/ 
+STRUCTURE OVERVIEW
+/***********************************************/
+
 Shader ""Name" {}
 -What Shader is referred to
 
@@ -45,10 +49,16 @@ Fragment Function
 	- Take in vertexOutput and output color
 	- Careful not to overload as can hinder performance
 
-
 Fallback
 -what it looks like in case shader fails
 
+/***********************************************/
+END of STRUCTURE OVERVIEW
+/***********************************************/
+
+___________________________
+
+DETAILS/EXPLANATION:
 ___________________________
 
 PROPERTIES
@@ -101,6 +111,7 @@ Uniform float4 _Color;  //optional uniform specifies that initial value is exter
 ......
 STRUCTS
 >>>>>>>>>>>
+
 Struct vertexInput{
 
 	//here we access semantics of object/model
