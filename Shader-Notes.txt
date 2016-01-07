@@ -1,0 +1,187 @@
+
+Structure of a Shader:
+
+Shader ""Name" {}
+-What Shader is referred to
+
+Properties {} 
+-Contains everything shader interfaces with
+-allow us to change values in the editor like colour, texture, cube map (for reflections) etc.
+
+SubShader{}
+-Where program is written and can be different for different platforms
+-To produce one shader that runs on multiple machines
+
+	Pass{}
+	-think of render passes 
+	-how we blend different types of lighting
+	-Pass block causes the geometry of an object to be rendered once
+	
+	CG PROGRAM ... ENDCG
+	-start processing in CG
+		
+		Define Variables for CG
+		
+		Structs
+		-like classes containing a number of pre-defined variables
+		-used to communicate between Unity and vertex function and vertex function and fragment function (how they talk to each other)
+		-Semantics contain info like normals, vertex position, and texture coord
+		-vertex function can write to these semantics to change out geometry 
+			
+			
+			Struct vertexInput - takes data from object and passes it to vertex function
+			
+			Struct vertexOutput - takes data from vertex function and passes it to fragment function
+		
+		
+		
+Vertex Function
+-deals with everything once per vertex per frame
+-take in vertexInput and return vertexOutput to use in fragment shader
+-only requirement is that we write out position of each vertex, every other property is extra
+
+Fragment Function
+	- Deals with everything once per pixel per frame
+	- Take in vertexOutput and output color
+	- Careful not to overload as can hinder performance
+
+
+Fallback
+-what it looks like in case shader fails
+
+___________________________
+
+PROPERTIES
+>>>>>>>>>>
+
+Syntax:
+Properties {
+	_Color ("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+}
+
+Notes:
+ - the underscore allows for property to be changed/set in unity editor
+
+
+____________
+
+SUBSHADERS
+>>>>>>>>>>
+
+SubShader{
+	
+	//optional Pass to define how object rendered (with blending, lights, diffuse, translucency etc.)
+	Pass{
+		
+		//to start processing CG, language by Nvidia
+		CGPROGRAM
+		
+		//pragmas
+		
+		//user-defined variable
+		
+		//base input structs
+		
+		//fvertex shader
+		
+		//fragment shader
+		
+		ENDCG
+	}
+	
+}
+
+
+.......
+USER DEFINED VARIABLES
+>>>>>>>>>>>>>>>
+
+Uniform float4 _Color;  //optional uniform specifies that initial value is external to CG program and allows transfer of shader to programs other than unity
+
+......
+STRUCTS
+>>>>>>>>>>>
+Struct vertexInput{
+
+	//here we access semantics of object/model
+	Float4 : POSITION;
+	Float4 : NORMAL;
+	
+	// float4 means (r,g,b,a)
+};
+
+struct vertexOutput{
+	float4 pos : SV_POSITION;
+	float4 col : COLOR;
+};
+
+Notes:
+-object comes with a bunch of semantics : normals, uv maps etc.
+-we access these semantics in the struct vertexInput
+-In vertexOutput, we pass vertex position, 
+ manipulate  (in vertex function) and pass to float4 pos (unity's builtin metric) 
+
+
+//model is not passed to unity, it is passed directly to GPU which then returns points to unity
+//SV_POSITION is for DirectX11
+
+........
+
+Vertex Function
+>>>>>>>>>>
+
+//arbitrary function name vert
+vertexOutput vert(vertexInput v)
+{
+	VertexOutput o;   
+	
+	O.col = float4(v.normal, 1.0);
+	
+	
+	//line that is in every shader which moves vertex position we get from object to unity's matrix so that it understands it
+	O.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+	
+	V.vertex xyzw;
+	
+	
+	Return o;    //  <<---need to return vertexOutput
+}
+
+Notes:
+-we take in vertexInput struct type
+-we write to vertexOutput struct, which then allows out fragment shader program to read the vertexOutput struct and for unity to read it
+
+
+....
+Fragment Function
+
+
+Float4 frag(vertexOutput i) : COLOR
+{
+	Return _Color;
+}
+
+Notes: 
+-referring to o from previous function as i
+-we dont NEED to assign the output to anything so we just use a float4 type
+-we give a semantic COLOR using colon operator, telling that it is a color (which it is "float4")
+
+
+.......
+PRAGMAS
+__________
+
+#pragma vertex vert
+#pragma fragment frag
+
+Notes:
+-Pragmas are instructions, telling unity where to look for vertex functions
+-there are a number of pragmas we can use (http://docs.unity3d.com/Manual/SL-ShaderPrograms.html)
+_________
+
+FALLBACKs
+>>>>>>>
+
+Fallback "Diffuse"
+
+-shader to use in case our shader fails
